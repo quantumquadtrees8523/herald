@@ -1,19 +1,27 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, query, orderBy } from 'firebase/firestore';
+// import { getAnalytics } from "firebase/analytics";
+
+// Import the functions you need from the SDKs you need
+// TODO: Add SDKs for Firebase products that you want to use
+// https://firebase.google.com/docs/web/setup#available-libraries
 
 // Your web app's Firebase configuration
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "",
-  authDomain: "",
-  projectId: "",
-  storageBucket: "",
-  messagingSenderId: "",
-  appId: ""
+  apiKey: "AIzaSyBYhFdp_CTuw7MyWptkNXu4G7PyyKB-pjk",
+  authDomain: "herald-9c3c1.firebaseapp.com",
+  projectId: "herald-9c3c1",
+  storageBucket: "herald-9c3c1.appspot.com",
+  messagingSenderId: "1057295222413",
+  appId: "1:1057295222413:web:f16851f59d8c3c3c6644c4",
+  measurementId: "G-CHE5MMCEJL"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+// const analytics = getAnalytics(app);
 
 // API functions
 export const api = {
@@ -23,7 +31,7 @@ export const api = {
       const docRef = await addDoc(collection(db, "posts"), {
         content: postContent,
         timestamp: new Date(),
-        userId: "", // To be filled in later
+        userId: "suryad96", // To be filled in later
         comments: []
       });
       return docRef.id;
