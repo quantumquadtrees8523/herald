@@ -30,7 +30,7 @@ function App() {
       const updatedPosts = await api.getPosts();
       setPosts(updatedPosts);
       setInput('');
-      setTab('feed');
+      // setTab('feed');
     } catch (error) {
       console.error("Error creating post:", error);
     }
