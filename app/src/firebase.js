@@ -41,6 +41,21 @@ export const api = {
     }
   },
 
+  createCreativeWriting: async (creativeInput) => {
+    try {
+      const docRef = await addDoc(collection(db, "creative_writing"), {
+        content: creativeInput,
+        timestamp: new Date(),
+        userId: "suryad96", // To be filled in later
+        comments: []
+      });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error adding creative writing: ", error);
+      throw error;
+    }
+  },
+
   // Read all posts
   getPosts: async () => {
     try {
@@ -52,6 +67,21 @@ export const api = {
       }));
     } catch (error) {
       console.error("Error getting posts: ", error);
+      throw error;
+    }
+  },
+
+  // Read all creative writings
+  getCreativeWritings: async () => {
+    try {
+      const creativeWritingsQuery = query(collection(db, "creative_writing"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(creativeWritingsQuery);
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error getting creative writings: ", error);
       throw error;
     }
   },
@@ -73,7 +103,38 @@ export const api = {
     }
   },
 
-  // Get comments for a post (not needed as separate function in Firestore)
-  // Comments are now included in the post document
-};
+  // Add a comment to a creative writing
+  addCreativeComment: async (creativeWritingId, commentContent) => {
+    try {
+      const creativeWritingRef = doc(db, "creative_writing", creativeWritingId);
+      await updateDoc(creativeWritingRef, {
+        comments: arrayUnion({
+          content: commentContent,
+          timestamp: new Date(),
+          userId: "" // To be filled in later
+        })
+      });
+    } catch (error) {
+      console.error("Error adding creative comment: ", error);
+      throw error;
+    }
+  },
 
+  // Get comments for a creative writing (not needed as separate function in Firestore)
+  // Comments are now included in the creative writing document
+  getCreativeComments: async (creativeWritingId) => {
+    try {
+      const creativeWritingRef = doc(db, "creative_writing", creativeWritingId);
+      const creativeWritingDoc = await getDocs(creativeWritingRef);
+      if (creativeWritingDoc.exists()) {
+        return creativeWritingDoc.data().comments || [];
+      } else {
+        console.log("No such creative writing!");
+        return [];
+      }
+    } catch (error) {
+      console.error("Error getting creative comments: ", error);
+      throw error;
+    }
+  }
+};
