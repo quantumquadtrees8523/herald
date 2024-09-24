@@ -4,6 +4,10 @@ import BlogPage from './components/blog_page';
 import HamburgerMenu from './components/hamburger-menu';
 import ChatbotPanel from './components/chatbot-panel';
 import AISafetyPage from './components/ai-safety-page';
+import ChatbotWrapper from './services/chatbot';
+
+// Create a global instance of ChatbotWrapper
+export const globalChatbot = new ChatbotWrapper();
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -38,9 +42,9 @@ function App() {
             <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} />
           </div>  
         )}
-        {activeSection === 'insane-new-york-news' && (
-          <div className="insane-new-york-news-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <BlogPage sectionName="insane new york news" retro90sStyle={retro90sStyle} />
+        {activeSection === 'todo-nyc' && (
+          <div className="todo-nyc-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
+            <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} />
           </div>
         )}
         {activeSection === 'graffiti' && (
@@ -53,7 +57,7 @@ function App() {
             <AISafetyPage />
           </div>
         )}
-        <ChatbotPanel retro90sStyle={retro90sStyle} />
+        <ChatbotPanel retro90sStyle={retro90sStyle} chatbot={globalChatbot} />
       </div>
     </div>
   );
