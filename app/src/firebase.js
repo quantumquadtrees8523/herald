@@ -156,5 +156,61 @@ export const api = {
       logAnalyticsEvent('error', { action: 'get_creative_comments', error: error.message });
       throw error;
     }
-  }
+  },
+
+  // Create a new graffiti post
+  createGraffiti: async (graffitiContent) => {
+    try {
+      const docRef = await addDoc(collection(db, "graffiti"), {
+        content: graffitiContent,
+        timestamp: new Date(),
+        userId: "suryad96", // To be filled in later
+        comments: []
+      });
+      logAnalyticsEvent('create_graffiti', { graffiti_id: docRef.id });
+      return docRef.id;
+    } catch (error) {
+      console.error("Error adding graffiti: ", error);
+      logAnalyticsEvent('error', { action: 'create_graffiti', error: error.message });
+      throw error;
+    }
+  },
+
+  // Read all graffiti posts
+  getGraffiti: async () => {
+    try {
+      const graffitiQuery = query(collection(db, "graffiti"), orderBy("timestamp", "desc"));
+      const querySnapshot = await getDocs(graffitiQuery);
+      logAnalyticsEvent('get_graffiti', { count: querySnapshot.size });
+      return querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } catch (error) {
+      console.error("Error getting graffiti: ", error);
+      logAnalyticsEvent('error', { action: 'get_graffiti', error: error.message });
+      throw error;
+    }
+  },
+
+  // Add a comment to a graffiti post
+  addGraffitiComment: async (graffitiId, commentContent) => {
+    try {
+      const graffitiRef = doc(db, "graffiti", graffitiId);
+      await updateDoc(graffitiRef, {
+        comments: arrayUnion({
+          content: commentContent,
+          timestamp: new Date(),
+          userId: "" // To be filled in later
+        })
+      });
+      logAnalyticsEvent('add_graffiti_comment', { graffiti_id: graffitiId });
+    } catch (error) {
+      console.error("Error adding graffiti comment: ", error);
+      logAnalyticsEvent('error', { action: 'add_graffiti_comment', error: error.message });
+      throw error;
+    }
+  },
+
+  // ... existing functions ...
 };

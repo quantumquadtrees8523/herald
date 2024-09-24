@@ -7,18 +7,24 @@ import ChatbotWrapper from './chatbot';
 function App() {
   const [posts, setPosts] = useState([]);
   const [creativeWritings, setCreativeWritings] = useState([]);
+  const [graffiti, setGraffiti] = useState([]);
   const [input, setInput] = useState('');
   const [creativeInput, setCreativeInput] = useState('');
+  const [graffitiInput, setGraffitiInput] = useState('');
   const [commentInput, setCommentInput] = useState({});
   const [creativeCommentInput, setCreativeCommentInput] = useState({});
+  const [graffitiCommentInput, setGraffitiCommentInput] = useState({});
   const [showComments, setShowComments] = useState({});
   const [showCreativeComments, setShowCreativeComments] = useState({});
+  const [showGraffitiComments, setShowGraffitiComments] = useState({});
   const [chatbotInput, setChatbotInput] = useState('');
   const [chatbotResponse, setChatbotResponse] = useState('');
   const [chatbot, setChatbot] = useState(null);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [showChatbot, setShowChatbot] = useState(false);
-  const [activeSection, setActiveSection] = useState('herald'); // 'herald' or 'insaneNews'
+  const [activeSection, setActiveSection] = useState('herald'); // 'herald', 'insaneNews', or 'graffiti'
+  const [miniDigest, setMiniDigest] = useState('');
+  const [isLocalhost, setIsLocalhost] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -26,6 +32,7 @@ function App() {
     };
 
     window.addEventListener('resize', handleResize);
+    setIsLocalhost(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
@@ -36,13 +43,17 @@ function App() {
         setPosts(fetchedPosts);
         const fetchedCreativeWritings = await api.getCreativeWritings();
         setCreativeWritings(fetchedCreativeWritings);
+        const fetchedGraffiti = await api.getGraffiti();
+        setGraffiti(fetchedGraffiti);
         const apiKey = "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"
         const newChatbot = new ChatbotWrapper(apiKey);
         newChatbot.ingestData([
           { section: 'blog', items: fetchedPosts },
-          { section: 'insane new york news', items: fetchedCreativeWritings }
+          { section: 'insane new york news', items: fetchedCreativeWritings },
+          { section: 'graffiti', items: fetchedGraffiti }
         ]);
         setChatbot(newChatbot);
+        updateMiniDigest(newChatbot);
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -50,56 +61,84 @@ function App() {
     fetchData();
   }, []);
 
-  const handleSubmit = async (e, isCreativeWriting = false) => {
+  const updateMiniDigest = async (chatbotInstance) => {
+    try {
+      const digest = await chatbotInstance.chat("Provide a brief summary of the latest content from all sections in about 50 words.");
+      setMiniDigest(digest);
+    } catch (error) {
+      console.error("Error updating mini digest:", error);
+      setMiniDigest("Unable to generate mini digest at this time.");
+    }
+  };
+
+  const handleSubmit = async (e, section) => {
     e.preventDefault();
     try {
-      if (isCreativeWriting) {
+      if (section === 'insaneNews') {
         await api.createCreativeWriting(creativeInput);
         const updatedCreativeWritings = await api.getCreativeWritings();
         setCreativeWritings(updatedCreativeWritings);
         setCreativeInput('');
+      } else if (section === 'graffiti') {
+        await api.createGraffiti(graffitiInput);
+        const updatedGraffiti = await api.getGraffiti();
+        setGraffiti(updatedGraffiti);
+        setGraffitiInput('');
       } else {
         await api.createPost(input);
         const updatedPosts = await api.getPosts();
         setPosts(updatedPosts);
         setInput('');
       }
-      const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings()];
+      const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings(), ...await api.getGraffiti()];
       chatbot.ingestData([
         { section: 'blog', items: allPosts },
-        { section: 'creative', items: allPosts }
+        { section: 'creative', items: allPosts },
+        { section: 'graffiti', items: allPosts }
       ]);
+      updateMiniDigest(chatbot);
     } catch (error) {
       console.error("Error creating post:", error);
     }
   };
 
-  const handleAddComment = async (postId, commentContent, isCreativeWriting = false) => {
+  const handleAddComment = async (postId, commentContent, section) => {
     if (commentContent) {
       try {
-        if (isCreativeWriting) {
+        if (section === 'insaneNews') {
           await api.addCreativeComment(postId, commentContent);
           const updatedCreativeWritings = await api.getCreativeWritings();
           setCreativeWritings(updatedCreativeWritings);
+        } else if (section === 'graffiti') {
+          await api.addGraffitiComment(postId, commentContent);
+          const updatedGraffiti = await api.getGraffiti();
+          setGraffiti(updatedGraffiti);
         } else {
           await api.addComment(postId, commentContent);
           const updatedPosts = await api.getPosts();
           setPosts(updatedPosts);
         }
-        const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings()];
+        const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings(), ...await api.getGraffiti()];
         chatbot.ingestData([
           { section: 'blog', items: allPosts },
-          { section: 'creative', items: allPosts }
+          { section: 'creative', items: allPosts },
+          { section: 'graffiti', items: allPosts }
         ]);
+        updateMiniDigest(chatbot);
       } catch (error) {
         console.error("Error adding comment:", error);
       }
     }
   };
 
-  const handleCommentInputChange = (postId, value, isCreativeWriting = false) => {
-    if (isCreativeWriting) {
+  const handleCommentInputChange = (postId, value, section) => {
+    if (section === 'insaneNews') {
       setCreativeCommentInput(prevState => ({
+        ...prevState,
+        [postId]: value
+      }));
+    } else if (section === 'graffiti') {
+      setGraffitiCommentInput(prevState => ({
         ...prevState,
         [postId]: value
       }));
@@ -111,9 +150,11 @@ function App() {
     }
   };
 
-  const toggleComments = (postId, isCreativeWriting = false) => {
-    if (isCreativeWriting) {
+  const toggleComments = (postId, section) => {
+    if (section === 'insaneNews') {
       setShowCreativeComments({ ...showCreativeComments, [postId]: !showCreativeComments[postId] });
+    } else if (section === 'graffiti') {
+      setShowGraffitiComments({ ...showGraffitiComments, [postId]: !showGraffitiComments[postId] });
     } else {
       setShowComments({ ...showComments, [postId]: !showComments[postId] });
     }
@@ -153,8 +194,9 @@ function App() {
       <div className="section-buttons" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <button onClick={() => setActiveSection('herald')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>Blog</button>
         <button onClick={() => setActiveSection('insaneNews')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>Insane New York News</button>
+        <button onClick={() => setActiveSection('graffiti')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>Graffiti</button>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-            <a href="https://www.google.com" target="_blank">
+            <a href="https://forms.gle/kDMh3s8N7Q9fXhJj6" target="_blank">
               <button style={{ ...retro90sStyle, cursor: 'pointer' }}>Feedback</button>
             </a>
           </div>
@@ -162,26 +204,28 @@ function App() {
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flex: 1, overflow: 'hidden' }}>
         {activeSection === 'herald' && (
           <div className="posts-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <form onSubmit={(e) => handleSubmit(e)} style={{ marginTop: '20px', padding: '10px' }}>
-              <textarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                placeholder="Write your blog post here (Markdown supported)..."
-                style={{ ...retro90sStyle, marginRight: '5px', width: '100%', minHeight: '100px' }}
-              />
-              <button type="submit" style={{ ...retro90sStyle, marginLeft: '5px', cursor: 'pointer' }}>Submit</button>
-            </form>
+            {isLocalhost && (
+              <form onSubmit={(e) => handleSubmit(e, 'herald')} style={{ marginTop: '20px', padding: '10px' }}>
+                <textarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  placeholder="Write your blog post here (Markdown supported)..."
+                  style={{ ...retro90sStyle, marginRight: '5px', width: '100%', height: '500px' }}
+                />
+                <button type="submit" style={{ ...retro90sStyle, marginLeft: '5px', cursor: 'pointer' }}>Submit</button>
+              </form>
+            )}
             <div className="feed">
               {posts.map((post) => (
                 <Post
                   key={post.id}
                   post={post}
-                  onToggleComments={(postId) => toggleComments(postId)}
+                  onToggleComments={(postId) => toggleComments(postId, 'herald')}
                   showComments={showComments[post.id]}
                   commentInput={commentInput[post.id] || ''}
-                  onCommentInputChange={(value) => handleCommentInputChange(post.id, value)}
+                  onCommentInputChange={(value) => handleCommentInputChange(post.id, value, 'herald')}
                   onAddComment={(commentContent) => {
-                    handleAddComment(post.id, commentContent);
+                    handleAddComment(post.id, commentContent, 'herald');
                     setCommentInput({ ...commentInput, [post.id]: '' });
                   }}
                   retro90sStyle={retro90sStyle}
@@ -192,27 +236,59 @@ function App() {
         )}
         {activeSection === 'insaneNews' && (
           <div className="creative-writing-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <form onSubmit={(e) => handleSubmit(e, true)} style={{ marginTop: '20px', padding: '10px' }}>
-              <textarea
-                value={creativeInput}
-                onChange={(e) => setCreativeInput(e.target.value)}
-                placeholder="Write your insane New York story here (Markdown supported)..."
-                style={{ ...retro90sStyle, marginRight: '5px', width: '100%', minHeight: '100px' }}
-              />
-              <button type="submit" style={{ ...retro90sStyle, marginLeft: '5px', cursor: 'pointer' }}>Submit</button>
-            </form>
+            {isLocalhost && (
+              <form onSubmit={(e) => handleSubmit(e, 'insaneNews')} style={{ marginTop: '20px', padding: '10px' }}>
+                <textarea
+                  value={creativeInput}
+                  onChange={(e) => setCreativeInput(e.target.value)}
+                  placeholder="Write your insane New York story here (Markdown supported)..."
+                  style={{ ...retro90sStyle, marginRight: '5px', width: '100%', minHeight: '100px' }}
+                />
+                <button type="submit" style={{ ...retro90sStyle, marginLeft: '5px', cursor: 'pointer' }}>Submit</button>
+              </form>
+            )}
             <div className="feed">
               {creativeWritings.map((post) => (
                 <Post
                   key={post.id}
                   post={post}
-                  onToggleComments={(postId) => toggleComments(postId, true)}
+                  onToggleComments={(postId) => toggleComments(postId, 'insaneNews')}
                   showComments={showCreativeComments[post.id]}
                   commentInput={creativeCommentInput[post.id] || ''}
-                  onCommentInputChange={(value) => handleCommentInputChange(post.id, value, true)}
+                  onCommentInputChange={(value) => handleCommentInputChange(post.id, value, 'insaneNews')}
                   onAddComment={(commentContent) => {
-                    handleAddComment(post.id, commentContent, true);
+                    handleAddComment(post.id, commentContent, 'insaneNews');
                     setCreativeCommentInput({ ...creativeCommentInput, [post.id]: '' });
+                  }}
+                  retro90sStyle={retro90sStyle}
+                />
+              ))}
+            </div>
+          </div>
+        )}
+        {activeSection === 'graffiti' && (
+          <div className="graffiti-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
+            <form onSubmit={(e) => handleSubmit(e, 'graffiti')} style={{ marginTop: '20px', padding: '10px' }}>
+              <textarea
+                value={graffitiInput}
+                onChange={(e) => setGraffitiInput(e.target.value)}
+                placeholder="Write your graffiti here (Markdown supported)..."
+                style={{ ...retro90sStyle, marginRight: '5px', width: '100%', minHeight: '100px' }}
+              />
+              <button type="submit" style={{ ...retro90sStyle, marginLeft: '5px', cursor: 'pointer' }}>Submit</button>
+            </form>
+            <div className="feed">
+              {graffiti.map((post) => (
+                <Post
+                  key={post.id}
+                  post={post}
+                  onToggleComments={(postId) => toggleComments(postId, 'graffiti')}
+                  showComments={showGraffitiComments[post.id]}
+                  commentInput={graffitiCommentInput[post.id] || ''}
+                  onCommentInputChange={(value) => handleCommentInputChange(post.id, value, 'graffiti')}
+                  onAddComment={(commentContent) => {
+                    handleAddComment(post.id, commentContent, 'graffiti');
+                    setGraffitiCommentInput({ ...graffitiCommentInput, [post.id]: '' });
                   }}
                   retro90sStyle={retro90sStyle}
                 />
@@ -233,13 +309,17 @@ function App() {
             zIndex: isMobile ? '1000' : 'auto'
           }}>
             <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4' }}>Chatbot</h2>
+            <div className="mini-digest" style={{ ...retro90sStyle, marginBottom: '15px', padding: '10px', border: '2px dashed #FF69B4' }}>
+              <h3 style={{ marginBottom: '5px' }}>Mini Digest</h3>
+              <p>{miniDigest}</p>
+            </div>
             <div className="chatbot">
               <form onSubmit={handleChatbotSubmit}>
                 <input
                   type="text"
                   value={chatbotInput}
                   onChange={(e) => setChatbotInput(e.target.value)}
-                  placeholder="Ask the chatbot something..."
+                  placeholder="Ask about whatever is on the Herald..."
                   style={{ ...retro90sStyle, width: '100%', marginBottom: '10px' }}
                 />
                 <button type="submit" style={{ ...retro90sStyle, width: '100%', cursor: 'pointer' }}>Send</button>

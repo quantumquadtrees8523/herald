@@ -9,7 +9,7 @@ const Post = ({ post, onToggleComments, showComments, commentInput, onCommentInp
     <div className="post" style={{ margin: '10px', width: '75%', height: '100%', overflow: 'auto', border: '1px solid #ccc', padding: '10px', paddingBottom: '25px' }}>
       <ReactMarkdown>{post.content}</ReactMarkdown>
       <button onClick={() => onToggleComments(post.id)} style={{ marginTop: '10px', width: '100%' }}>
-        {showComments ? 'Hide Comments' : 'Show Comments'}
+        {showComments ? 'Hide Comments' : 'Comments'}
       </button>
       {showComments && (
         <div className="comments" style={{ marginTop: '10px' }}>
