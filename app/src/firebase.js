@@ -1,6 +1,6 @@
 import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, query, orderBy } from 'firebase/firestore';
-// import { getAnalytics } from "firebase/analytics";
+import { getAnalytics, logEvent } from "firebase/analytics";
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -21,7 +21,12 @@ const firebaseConfig = {
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
-// const analytics = getAnalytics(app);
+const analytics = getAnalytics(app);
+
+// Helper function to log events
+const logAnalyticsEvent = (eventName, eventParams) => {
+  logEvent(analytics, eventName, eventParams);
+};
 
 // API functions
 export const api = {
@@ -34,9 +39,11 @@ export const api = {
         userId: "suryad96", // To be filled in later
         comments: []
       });
+      logAnalyticsEvent('create_post', { post_id: docRef.id });
       return docRef.id;
     } catch (error) {
       console.error("Error adding post: ", error);
+      logAnalyticsEvent('error', { action: 'create_post', error: error.message });
       throw error;
     }
   },
@@ -49,9 +56,11 @@ export const api = {
         userId: "suryad96", // To be filled in later
         comments: []
       });
+      logAnalyticsEvent('create_creative_writing', { writing_id: docRef.id });
       return docRef.id;
     } catch (error) {
       console.error("Error adding creative writing: ", error);
+      logAnalyticsEvent('error', { action: 'create_creative_writing', error: error.message });
       throw error;
     }
   },
@@ -61,12 +70,14 @@ export const api = {
     try {
       const postsQuery = query(collection(db, "posts"), orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(postsQuery);
+      logAnalyticsEvent('get_posts', { count: querySnapshot.size });
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
     } catch (error) {
       console.error("Error getting posts: ", error);
+      logAnalyticsEvent('error', { action: 'get_posts', error: error.message });
       throw error;
     }
   },
@@ -76,12 +87,14 @@ export const api = {
     try {
       const creativeWritingsQuery = query(collection(db, "creative_writing"), orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(creativeWritingsQuery);
+      logAnalyticsEvent('get_creative_writings', { count: querySnapshot.size });
       return querySnapshot.docs.map(doc => ({
         id: doc.id,
         ...doc.data()
       }));
     } catch (error) {
       console.error("Error getting creative writings: ", error);
+      logAnalyticsEvent('error', { action: 'get_creative_writings', error: error.message });
       throw error;
     }
   },
@@ -97,8 +110,10 @@ export const api = {
           userId: "" // To be filled in later
         })
       });
+      logAnalyticsEvent('add_comment', { post_id: postId });
     } catch (error) {
       console.error("Error adding comment: ", error);
+      logAnalyticsEvent('error', { action: 'add_comment', error: error.message });
       throw error;
     }
   },
@@ -114,8 +129,10 @@ export const api = {
           userId: "" // To be filled in later
         })
       });
+      logAnalyticsEvent('add_creative_comment', { writing_id: creativeWritingId });
     } catch (error) {
       console.error("Error adding creative comment: ", error);
+      logAnalyticsEvent('error', { action: 'add_creative_comment', error: error.message });
       throw error;
     }
   },
@@ -127,13 +144,16 @@ export const api = {
       const creativeWritingRef = doc(db, "creative_writing", creativeWritingId);
       const creativeWritingDoc = await getDocs(creativeWritingRef);
       if (creativeWritingDoc.exists()) {
+        logAnalyticsEvent('get_creative_comments', { writing_id: creativeWritingId });
         return creativeWritingDoc.data().comments || [];
       } else {
         console.log("No such creative writing!");
+        logAnalyticsEvent('error', { action: 'get_creative_comments', error: 'No such creative writing' });
         return [];
       }
     } catch (error) {
       console.error("Error getting creative comments: ", error);
+      logAnalyticsEvent('error', { action: 'get_creative_comments', error: error.message });
       throw error;
     }
   }

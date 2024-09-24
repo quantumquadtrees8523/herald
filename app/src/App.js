@@ -38,7 +38,10 @@ function App() {
         setCreativeWritings(fetchedCreativeWritings);
         const apiKey = "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"
         const newChatbot = new ChatbotWrapper(apiKey);
-        newChatbot.ingestPosts([...fetchedPosts, ...fetchedCreativeWritings]);
+        newChatbot.ingestData([
+          { section: 'blog', items: fetchedPosts },
+          { section: 'insane new york news', items: fetchedCreativeWritings }
+        ]);
         setChatbot(newChatbot);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -62,7 +65,10 @@ function App() {
         setInput('');
       }
       const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings()];
-      chatbot.ingestPosts(allPosts);
+      chatbot.ingestData([
+        { section: 'blog', items: allPosts },
+        { section: 'creative', items: allPosts }
+      ]);
     } catch (error) {
       console.error("Error creating post:", error);
     }
@@ -81,7 +87,10 @@ function App() {
           setPosts(updatedPosts);
         }
         const allPosts = [...await api.getPosts(), ...await api.getCreativeWritings()];
-        chatbot.ingestPosts(allPosts);
+        chatbot.ingestData([
+          { section: 'blog', items: allPosts },
+          { section: 'creative', items: allPosts }
+        ]);
       } catch (error) {
         console.error("Error adding comment:", error);
       }
@@ -142,7 +151,7 @@ function App() {
       <h1 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The Herald</h1>
       <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The People's Paper!</h2>
       <div className="section-buttons" style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-        <button onClick={() => setActiveSection('herald')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>The Herald</button>
+        <button onClick={() => setActiveSection('herald')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>Blog</button>
         <button onClick={() => setActiveSection('insaneNews')} style={{ ...retro90sStyle, cursor: 'pointer', marginRight: '10px' }}>Insane New York News</button>
           <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
             <a href="https://www.google.com" target="_blank">
