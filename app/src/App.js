@@ -7,7 +7,7 @@ import AISafetyPage from './components/ai-safety-page';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [activeSection, setActiveSection] = useState('herald'); // 'herald', 'insaneNews', 'graffiti', or 'markdownSection'
+  const [activeSection, setActiveSection] = useState('blog');
 
   useEffect(() => {
     const handleResize = () => {
@@ -33,14 +33,14 @@ function App() {
       <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The People's Paper!</h2>
       <HamburgerMenu setActiveSection={setActiveSection} retro90sStyle={retro90sStyle} />
       <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flex: 1, overflow: 'hidden' }}>
-        {activeSection === 'herald' && (
+        {activeSection === 'blog' && (
           <div className="posts-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
             <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} />
-          </div>
+          </div>  
         )}
-        {activeSection === 'insaneNews' && (
-          <div className="insaneNews-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <BlogPage sectionName="insaneNews" retro90sStyle={retro90sStyle} />
+        {activeSection === 'insane-new-york-news' && (
+          <div className="insane-new-york-news-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
+            <BlogPage sectionName="insane new york news" retro90sStyle={retro90sStyle} />
           </div>
         )}
         {activeSection === 'graffiti' && (
@@ -48,7 +48,7 @@ function App() {
             <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} />
           </div>
         )}
-        {activeSection === 'markdownSection' && (
+        {activeSection === 'ai-safety' && (
           <div className="markdown-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
             <AISafetyPage />
           </div>
