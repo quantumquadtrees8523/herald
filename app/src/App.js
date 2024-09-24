@@ -296,17 +296,36 @@ function App() {
             </div>
           </div>
         )}
+        {isMobile && (
+          <button 
+            onClick={toggleChatbot} 
+            style={{
+              ...retro90sStyle,
+              position: 'fixed',
+              bottom: '20px',
+              right: '20px',
+              zIndex: '1001',
+              cursor: 'pointer'
+            }}
+          >
+            {showChatbot ? 'Close Chatbot' : 'Open Chatbot'}
+          </button>
+        )}
         {(!isMobile || (isMobile && showChatbot)) && (
           <div className="chatbot-section" style={{
             ...retro90sStyle,
             width: isMobile ? '100%' : '25%',
+            height: isMobile ? '50%' : 'auto',
             borderLeft: isMobile ? 'none' : '3px solid #FF1493',
             padding: '20px',
             position: isMobile ? 'fixed' : 'relative',
             bottom: isMobile ? '0' : 'auto',
             left: isMobile ? '0' : 'auto',
             right: isMobile ? '0' : 'auto',
-            zIndex: isMobile ? '1000' : 'auto'
+            zIndex: isMobile ? '1000' : 'auto',
+            overflowY: 'auto',
+            transition: 'all 0.3s ease-in-out',
+            transform: isMobile ? (showChatbot ? 'translateY(0)' : 'translateY(100%)') : 'none'
           }}>
             <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4' }}>Chatbot</h2>
             <div className="mini-digest" style={{ ...retro90sStyle, marginBottom: '15px', padding: '10px', border: '2px dashed #FF69B4' }}>
