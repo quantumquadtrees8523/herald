@@ -4,10 +4,10 @@ import BlogPage from './components/blog_page';
 import HamburgerMenu from './components/hamburger-menu';
 import ChatbotPanel from './components/chatbot-panel';
 import AISafetyPage from './components/ai-safety-page';
-import ChatbotWrapper from './services/chatbot';
+import ChatbotWrapperNew from './services/chatbot_new.ts';
 
 // Create a global instance of ChatbotWrapper
-export const globalChatbot = new ChatbotWrapper();
+export const globalChatbot = new ChatbotWrapperNew();
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);

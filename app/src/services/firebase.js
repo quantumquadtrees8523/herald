@@ -28,6 +28,15 @@ const auth = getAuth(app);
 
 let currentUser = null;
 
+// Determine if we're on localhost
+const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+
+// Function to get the correct path
+const getPath = (collectionName) => {
+  const prefix = isLocalhost ? '' : '';
+  return `${prefix}${collectionName}`;
+};
+
 // Sign in anonymously
 signInAnonymously(auth)
   .then(() => {
@@ -66,14 +75,14 @@ export const api = {
   createPost: async (postContent, collectionName) => {
     try {
       if (!currentUser) throw new Error("User not authenticated");
-      const docRef = await addDoc(collection(db, collectionName), {
+      const docRef = await addDoc(collection(db, getPath(collectionName)), {
         content: postContent,
         timestamp: new Date(),
         userId: currentUser.uid,
         comments: []
       });
       logAnalyticsEvent('create_post', { post_id: docRef.id });
-      await updateChatbotContext();
+      updateChatbotContext();
       return docRef.id;
     } catch (error) {
       console.error("Error adding post: ", error);
@@ -85,7 +94,7 @@ export const api = {
   // Read all posts
   getPosts: async (sectionName) => {
     try {
-      const postsQuery = query(collection(db, sectionName), orderBy("timestamp", "desc"));
+      const postsQuery = query(collection(db, getPath(sectionName)), orderBy("timestamp", "desc"));
       const querySnapshot = await getDocs(postsQuery);
       logAnalyticsEvent(`get_posts_${sectionName}`, { count: querySnapshot.size });
       return querySnapshot.docs.map(doc => ({
@@ -103,7 +112,7 @@ export const api = {
   // Comments are now included in the creative writing document
   getComments: async (sectionName, postId) => {
     try {
-      const postRef = doc(db, sectionName, postId);
+      const postRef = doc(db, getPath(sectionName), postId);
       console.log(postRef);
       const postDoc = await getDoc(postRef);
       if (postDoc.exists()) {
@@ -124,7 +133,7 @@ export const api = {
   addComment: async (sectionName, postId, commentContent) => {
     try {
       if (!currentUser) throw new Error("User not authenticated");
-      const postRef = doc(db, sectionName, postId);
+      const postRef = doc(db, getPath(sectionName), postId);
       await updateDoc(postRef, {
         comments: arrayUnion({
           content: commentContent,
@@ -133,7 +142,7 @@ export const api = {
         })
       });
       logAnalyticsEvent('add_comment', { post_id: postId });
-      await updateChatbotContext();
+      updateChatbotContext();
     } catch (error) {
       console.error("Error adding comment: ", error);
       logAnalyticsEvent('error', { action: 'add_comment', error: error.message });

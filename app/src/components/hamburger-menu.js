@@ -15,22 +15,22 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
   return (
     <div style={containerStyle}>
       <MenuButton
-        label="Blog"
+        label={<strong><b>Blog</b></strong>}
         onClick={() => setActiveSection('blog')}
         retro90sStyle={retro90sStyle}
       />
       <MenuButton
-        label="todo nyc"
+        label={<strong><b>todo nyc</b></strong>}
         onClick={() => setActiveSection('todo-nyc')}
         retro90sStyle={retro90sStyle}
       />
       <MenuButton
-        label="Graffiti"
+        label={<strong><b>Graffiti</b></strong>}
         onClick={() => setActiveSection('graffiti')}
         retro90sStyle={retro90sStyle}
       />
       <MenuButton
-        label="how ai is used on this site"
+        label={<strong>how ai is used on this site</strong>}
         onClick={() => setActiveSection('ai-safety')}
         retro90sStyle={{
           ...retro90sStyle,
@@ -42,8 +42,17 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
       />
       <a href="https://forms.gle/kDMh3s8N7Q9fXhJj6" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
         <MenuButton
-          label="Feedback"
-          retro90sStyle={retro90sStyle}
+          label={<strong>Feedback</strong>}
+          retro90sStyle={{
+            ...retro90sStyle,
+            // backgroundColor: '#00BFFF', // Bright blue color
+            color: 'black',
+            fontWeight: 'bold',
+            border: '3px solid #0080FF',
+            boxShadow: '0 0 10px #00BFFF',
+            transform: 'scale(1.05)',
+            transition: 'all 0.3s ease-in-out'
+          }}
         />
       </a>
     </div>
