@@ -3,14 +3,14 @@ import './App.css';
 import BlogPage from './components/blog_page';
 import HamburgerMenu from './components/hamburger-menu';
 import AISafetyPage from './components/ai-safety-page';
-import ChatbotWrapperNew from './services/chatbot_new';
+import AiInterface from './services/ai_interface';
 import FrontPage from './components/front-page';
 import ChatbotPanel from './components/chatbot-panel';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [activeSection, setActiveSection] = useState('blog');
-  const [globalChatbot, setGlobalChatbot] = useState(null);
+  const [activeSection, setActiveSection] = useState('front_page');
+  const [aiInterface, setAiInterface] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
@@ -18,8 +18,8 @@ function App() {
     };
 
     const initializeApp = async () => {
-      const chatbot = await ChatbotWrapperNew.create();
-      setGlobalChatbot(chatbot);
+      const aiInterfaceInstance = await AiInterface.create();
+      setAiInterface(aiInterfaceInstance);
     };
 
     window.addEventListener('resize', handleResize);
@@ -28,7 +28,7 @@ function App() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  if (!globalChatbot) {
+  if (!aiInterface) {
     return <div>Loading...</div>; // Or any loading indicator you prefer
   }
 
@@ -47,14 +47,14 @@ function App() {
       <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The People's Paper!</h2>
       <HamburgerMenu setActiveSection={setActiveSection} retro90sStyle={retro90sStyle} />
       <div style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
-        {activeSection === 'front_page' && <FrontPage globalChatbot={globalChatbot} retro90sStyle={retro90sStyle} />}
+        {activeSection === 'front_page' && <FrontPage aiInterface={aiInterface} retro90sStyle={retro90sStyle} />}
         {activeSection === 'blog' && <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} />}
         {activeSection === 'todo-nyc' && <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} />}
         {activeSection === 'graffiti' && <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} />}
         {activeSection === 'ai-safety' && <AISafetyPage />}
       </div>
       <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
-        <ChatbotPanel globalChatbot={globalChatbot} retro90sStyle={retro90sStyle} />
+        <ChatbotPanel aiInterface={aiInterface} retro90sStyle={retro90sStyle} />
       </div>
     </div>
   );

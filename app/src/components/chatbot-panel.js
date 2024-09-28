@@ -1,10 +1,9 @@
 import React, { useState } from 'react';
 
-const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, globalChatbot }) => {
+const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, aiInterface }) => {
     const [chatbotInput, setChatbotInput] = useState('');
     const [chatbotResponse, setChatbotResponse] = useState('');
     const [isMinimized, setIsMinimized] = useState(chatbotMinimized);
-    const [chatbot, setChatbot] = useState(globalChatbot);
 
     const toggleChatbotMinimize = () => {
         setIsMinimized(!isMinimized);
@@ -12,7 +11,7 @@ const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, globalChatbot
 
     const handleChatbotSubmit = async (e) => {
         e.preventDefault();
-        const aiResponse = await chatbot.chat(chatbotInput);
+        const aiResponse = await aiInterface.chat(chatbotInput);
         setChatbotResponse(aiResponse);
         setChatbotInput('');
     };
