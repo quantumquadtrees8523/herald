@@ -2,25 +2,35 @@ import React, { useState, useEffect } from 'react';
 import './App.css';
 import BlogPage from './components/blog_page';
 import HamburgerMenu from './components/hamburger-menu';
-import ChatbotPanel from './components/chatbot-panel';
 import AISafetyPage from './components/ai-safety-page';
-import ChatbotWrapperNew from './services/chatbot_new.ts';
-
-// Create a global instance of ChatbotWrapper
-export const globalChatbot = new ChatbotWrapperNew();
+import ChatbotWrapperNew from './services/chatbot_new';
+import FrontPage from './components/front-page';
+import ChatbotPanel from './components/chatbot-panel';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
   const [activeSection, setActiveSection] = useState('blog');
+  const [globalChatbot, setGlobalChatbot] = useState(null);
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth <= 768);
     };
 
+    const initializeApp = async () => {
+      const chatbot = await ChatbotWrapperNew.create();
+      setGlobalChatbot(chatbot);
+    };
+
     window.addEventListener('resize', handleResize);
+    initializeApp();
+
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  if (!globalChatbot) {
+    return <div>Loading...</div>; // Or any loading indicator you prefer
+  }
 
   const retro90sStyle = {
     fontFamily: '"Courier New", monospace',
@@ -32,32 +42,19 @@ function App() {
   };
 
   return (
-    <div className="App" style={{ ...retro90sStyle, display: 'flex', flexDirection: 'column', height: '100vh' }}>
+    <div className="App" style={{ ...retro90sStyle, display: 'flex', flexDirection: 'column', height: '100vh', position: 'relative' }}>
       <h1 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The Herald</h1>
       <h2 style={{ textAlign: 'center', textShadow: '2px 2px #FF69B4', margin: '10px 0' }}>The People's Paper!</h2>
       <HamburgerMenu setActiveSection={setActiveSection} retro90sStyle={retro90sStyle} />
-      <div style={{ display: 'flex', flexDirection: isMobile ? 'column' : 'row', flex: 1, overflow: 'hidden' }}>
-        {activeSection === 'blog' && (
-          <div className="posts-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} />
-          </div>  
-        )}
-        {activeSection === 'todo-nyc' && (
-          <div className="todo-nyc-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} />
-          </div>
-        )}
-        {activeSection === 'graffiti' && (
-          <div className="graffiti-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} />
-          </div>
-        )}
-        {activeSection === 'ai-safety' && (
-          <div className="markdown-section" style={{ width: '100%', overflowY: 'auto', padding: '20px' }}>
-            <AISafetyPage />
-          </div>
-        )}
-        <ChatbotPanel retro90sStyle={retro90sStyle} chatbot={globalChatbot} />
+      <div style={{ flex: 1, overflow: 'auto', padding: '20px' }}>
+        {activeSection === 'front_page' && <FrontPage globalChatbot={globalChatbot} retro90sStyle={retro90sStyle} />}
+        {activeSection === 'blog' && <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} />}
+        {activeSection === 'todo-nyc' && <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} />}
+        {activeSection === 'graffiti' && <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} />}
+        {activeSection === 'ai-safety' && <AISafetyPage />}
+      </div>
+      <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
+        <ChatbotPanel globalChatbot={globalChatbot} retro90sStyle={retro90sStyle} />
       </div>
     </div>
   );

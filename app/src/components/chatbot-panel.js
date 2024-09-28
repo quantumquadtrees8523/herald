@@ -1,28 +1,16 @@
-import React, { useEffect, useState } from 'react';
-import ChatbotWrapper from '../services/chatbot';
-import ReactMarkdown from 'react-markdown';
+import React, { useState } from 'react';
 
-const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, chatbot }) => {
-    const [miniDigest, setMiniDigest] = useState('');
+const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, globalChatbot }) => {
     const [chatbotInput, setChatbotInput] = useState('');
     const [chatbotResponse, setChatbotResponse] = useState('');
     const [isMinimized, setIsMinimized] = useState(chatbotMinimized);
+    const [chatbot, setChatbot] = useState(globalChatbot);
 
-    useEffect(() => {
-        const fetchMiniDigest = async () => {
-            const digest = await chatbot.getMiniDigest();
-            setMiniDigest(digest);
-        };
-        fetchMiniDigest();
-    }, []);
-
-    // Stub for toggleChatbotMinimize
     const toggleChatbotMinimize = () => {
         setIsMinimized(!isMinimized);
     };
 
-    // Stub for handleChatbotSubmit
-    const handleChatbotSubmit =async (e) => {
+    const handleChatbotSubmit = async (e) => {
         e.preventDefault();
         const aiResponse = await chatbot.chat(chatbotInput);
         setChatbotResponse(aiResponse);
@@ -34,20 +22,15 @@ const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, chatbot }) =>
   
     const chatbotSectionStyle = {
         ...retro90sStyle,
-        width: isMobile ? '100%' : '25%',
-        height: isMinimized ? 'auto' : (isMobile ? '50%' : 'auto'),
-        borderLeft: isMobile ? 'none' : strongBlackBorder,
-        borderTop: strongBlackBorder,
-        borderRight: strongBlackBorder,
-        borderBottom: isMinimized ? 'none' : strongBlackBorder,
-        padding: isMinimized ? '10px' : '20px',
-        position: 'fixed',
-        bottom: '0',
-        right: '0',
-        zIndex: '1000',
-        overflowY: 'auto',
-        transition: 'all 0.3s ease-in-out',
-        transform: isMinimized ? 'translateY(calc(100% - 40px))' : 'translateY(0)'
+        width: '97%',
+        height: '100%',
+        borderLeft: strongBlackBorder,
+        borderRight: '6px solid #000000',
+        padding: '10px',
+        overflowY: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
+        marginRight: '100px'
     };
 
     const headerStyle = {
@@ -67,72 +50,76 @@ const ChatbotPanel = ({ isMobile, chatbotMinimized, retro90sStyle, chatbot }) =>
         ...retro90sStyle,
         cursor: 'pointer',
         padding: '5px 10px',
-        border: mediumBlackBorder
+        border: mediumBlackBorder,
+        marginLeft: '5px'
     };
 
-    const miniDigestStyle = {
+    const chatbotContainerStyle = {
         ...retro90sStyle,
-        marginBottom: '15px',
+        border: strongBlackBorder,
         padding: '10px',
-        border: mediumBlackBorder
+        marginTop: '5px'
     };
 
     const inputStyle = {
         ...retro90sStyle,
-        width: '100%',
+        width: 'calc(100% - 70px)',
         marginBottom: '10px',
-        border: mediumBlackBorder
+        border: mediumBlackBorder,
+        padding: '5px'
     };
 
     const sendButtonStyle = {
         ...retro90sStyle,
-        width: '100%',
+        width: '60px',
         cursor: 'pointer',
-        border: mediumBlackBorder
+        border: mediumBlackBorder,
+        marginLeft: '10px'
     };
 
     const responseStyle = {
         ...retro90sStyle,
         marginTop: '10px',
         border: mediumBlackBorder,
-        padding: '10px'
+        padding: '10px',
+        height: '100px',
+        overflowY: 'auto'
     };
 
     return (
         <div className="chatbot-section" style={chatbotSectionStyle}>
             <div style={headerStyle}>
                 <h2 style={titleStyle}>Chatbot</h2>
-                <button 
-                    onClick={toggleChatbotMinimize} 
-                    style={buttonStyle}
-                >
-                    {isMinimized ? 'Maximize' : 'Minimize'}
-                </button>
+                <div>
+                    <button 
+                        onClick={toggleChatbotMinimize} 
+                        style={buttonStyle}
+                    >
+                        {isMinimized ? 'Maximize' : 'Minimize'}
+                    </button>
+                </div>
             </div>
             {!isMinimized && (
-                <>
-                    <div className="mini-digest" style={miniDigestStyle}>
-                        <h3 style={{ marginBottom: '5px' }}>Mini Digest</h3>
-                        <ReactMarkdown>{miniDigest}</ReactMarkdown>
-                    </div>
-                    <div className="chatbot">
-                        <form onSubmit={handleChatbotSubmit}>
-                            <input
-                                type="text"
-                                value={chatbotInput}
-                                onChange={(e) => setChatbotInput(e.target.value)}
-                                placeholder="Ask about whatever is on the Herald..."
-                                style={inputStyle}
-                            />
-                            <button type="submit" style={sendButtonStyle}>Send</button>
-                        </form>
+                <div className="chatbot-container" style={chatbotContainerStyle}>
+                    <h3>Ask the Chatbot</h3>
+                    <form onSubmit={handleChatbotSubmit} style={{ display: 'flex' }}>
+                        <input
+                            type="text"
+                            value={chatbotInput}
+                            onChange={(e) => setChatbotInput(e.target.value)}
+                            placeholder="Ask about whatever is on the Herald..."
+                            style={inputStyle}
+                        />
+                        <button type="submit" style={sendButtonStyle}>Send</button>
+                    </form>
+                    <div style={responseStyle}>
                         {chatbotResponse && (
-                            <div style={responseStyle}>
+                            <>
                                 <strong>Chatbot:</strong> {chatbotResponse}
-                            </div>
+                            </>
                         )}
                     </div>
-                </>
+                </div>
             )}
         </div>
     );

@@ -15,6 +15,11 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
   return (
     <div style={containerStyle}>
       <MenuButton
+        label={<strong><b>Front Page</b></strong>}
+        onClick={() => setActiveSection('front_page')}
+        retro90sStyle={retro90sStyle}
+      />
+      <MenuButton
         label={<strong><b>Blog</b></strong>}
         onClick={() => setActiveSection('blog')}
         retro90sStyle={retro90sStyle}
@@ -45,7 +50,6 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
           label={<strong>Feedback</strong>}
           retro90sStyle={{
             ...retro90sStyle,
-            // backgroundColor: '#00BFFF', // Bright blue color
             color: 'black',
             fontWeight: 'bold',
             border: '3px solid #0080FF',

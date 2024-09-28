@@ -5,13 +5,15 @@ import {api} from '../services/firebase';
 
 function BlogPage({ 
   sectionName: initialSectionName, 
-  retro90sStyle
+  retro90sStyle,
+  globalChatbot
 }) {
   const [input, setInput] = useState('');
   const [posts, setPosts] = useState([]);
   const [sectionName] = useState(initialSectionName);
   const [isLocalhost, setIsLocalhost] = useState(true);
   const [previewMarkdown, setPreviewMarkdown] = useState('');
+  const [chatbot, setChatbot] = useState(globalChatbot);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -22,17 +24,28 @@ function BlogPage({
     loadPage();
   }, [sectionName, isLocalhost]);
 
+  const getPosts = async () => {
+    const posts_list = await api.getPosts(sectionName);
+    return posts_list;
+  };
+
+  const createPost = async (content) => {
+    const newPostId = await api.createPost(content, sectionName);
+    const newPost = {
+      id: newPostId,
+      content: content,
+      timestamp: new Date(),
+      comments: []
+    };
+    await chatbot.chat(`New post created in section ${sectionName}: ${content}`);
+    return newPost;
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (input.trim()) {
       try {
-        const newPostId = await api.createPost(input, sectionName);
-        const newPost = {
-          id: newPostId,
-          content: input,
-          timestamp: new Date(),
-          comments: []
-        };
+        const newPost = await createPost(input);
         setPosts([newPost, ...posts]);
         setInput('');
         setPreviewMarkdown('');
@@ -73,6 +86,7 @@ function BlogPage({
             post={post}
             sectionName={sectionName}
             retro90sStyle={retro90sStyle}
+            globalChatbot={globalChatbot}
           />
         ))}
       </div>

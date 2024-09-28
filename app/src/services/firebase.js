@@ -2,7 +2,7 @@ import { initializeApp } from 'firebase/app';
 import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, query, orderBy, getDoc } from 'firebase/firestore';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-import { globalChatbot } from '../App';
+// import globalChatbot from '../App
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -62,12 +62,6 @@ const logAnalyticsEvent = (eventName, eventParams) => {
   logEvent(analytics, eventName, eventParams);
 };
 
-// Helper function to update chatbot context
-const updateChatbotContext = async () => {
-  const allData = await api.getAllDataForMiniDigest();
-  globalChatbot.ingestData(allData);
-  await globalChatbot.chat("here is some new information");
-};
 
 // API functions
 export const api = {
@@ -82,7 +76,7 @@ export const api = {
         comments: []
       });
       logAnalyticsEvent('create_post', { post_id: docRef.id });
-      updateChatbotContext();
+      // updateChatbotContext();
       return docRef.id;
     } catch (error) {
       console.error("Error adding post: ", error);
@@ -113,7 +107,6 @@ export const api = {
   getComments: async (sectionName, postId) => {
     try {
       const postRef = doc(db, getPath(sectionName), postId);
-      console.log(postRef);
       const postDoc = await getDoc(postRef);
       if (postDoc.exists()) {
         logAnalyticsEvent(`get_${sectionName}_comments`, { post_id: postId });
@@ -142,7 +135,6 @@ export const api = {
         })
       });
       logAnalyticsEvent('add_comment', { post_id: postId });
-      updateChatbotContext();
     } catch (error) {
       console.error("Error adding comment: ", error);
       logAnalyticsEvent('error', { action: 'add_comment', error: error.message });

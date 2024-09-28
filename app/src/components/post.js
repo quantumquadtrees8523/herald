@@ -3,17 +3,16 @@ import ReactMarkdown from 'react-markdown';
 import Comment from './comment';
 import { api } from '../services/firebase';
 
-const Post = ({ post, sectionName }) => {
+const Post = ({ post, sectionName, globalChatbot }) => {
   const [localComments, setLocalComments] = useState([]);
   const [localCommentInput, setLocalCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
+  const [chatbot, setChatbot] = useState(globalChatbot);
 
   useEffect(() => {
     const fetchComments = async () => {
       try {
         const comments = await api.getComments(sectionName, post.id);
-        console.log(post.id);
-        console.log(comments.length);
         setLocalComments(comments);
       } catch (error) {
         console.error("Error fetching comments: ", error);
@@ -27,11 +26,16 @@ const Post = ({ post, sectionName }) => {
     setShowComments(!showComments);
   };
 
+  const addComment = async (globalChatbot,postId, commentContent) => {
+    await api.addComment(sectionName, postId, commentContent);
+    await globalChatbot.chat(`New comment added to post ${postId} in section ${sectionName}: ${commentContent}`);
+  };
+
   const handleAddComment = async () => {
     if (localCommentInput.trim()) {
       try {
         await api.addComment(sectionName, post.id, localCommentInput);
-        
+        await addComment(globalChatbot, post.id, localCommentInput);
         const newComment = {
           content: localCommentInput,
           timestamp: new Date(),
@@ -39,9 +43,9 @@ const Post = ({ post, sectionName }) => {
         };
         
         setLocalComments([...localComments, newComment]);
-        setLocalCommentInput('');
       } catch (error) {
         console.error("Error adding comment: ", error);
+        setLocalCommentInput('');
       }
     }
   };

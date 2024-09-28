@@ -28,7 +28,7 @@ class ChatbotWrapper {
     console.log('Ingested context:', this.context);
   }
 
-  async chat(userMessage) {
+  async chat(userMessage, temperature = 0.7, max_tokens = 50) {
     const updateStatus = (status) => {
       console.log(status);
     };
@@ -52,7 +52,8 @@ class ChatbotWrapper {
       const response = await this.openai.chat.completions.create({
         model: 'gpt-3.5-turbo',
         messages: messages,
-        // max_tokens: 50,
+        temperature,
+        max_tokens
       });
 
       updateStatus('Processing AI response...');
@@ -90,7 +91,7 @@ class ChatbotWrapper {
       const prompt = "Create a brief summary of the most important or interesting points from the following data. Split it up by section in markdown format. Keep it concise, around 2-3 sentences per section:";
 
       // Generate the mini digest using the chat method
-      const miniDigest = await this.chat(prompt);
+      const miniDigest = await this.chat(prompt, 0.1, 5000);
 
       // Trim any extra whitespace and return the result
       return miniDigest.trim();
