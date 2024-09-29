@@ -21,8 +21,9 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && npm run copy-build",
-    "copy-build": "copyfiles -u 1 build/* ../public/",
+    "clean-public": "rm -rf ../public/*",
+    "copy-build": "copyfiles -u 1 \"build/**/*\" ../public/",
+    "build": "react-scripts build && npm run clean-public && npm run copy-build",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy": "firebase deploy"
@@ -47,5 +48,6 @@
   },
   "devDependencies": {
     "@babel/plugin-transform-private-property-in-object": "^7.24.7"
-  }
+  },
+  "proxy": "http://localhost:5001"
 }

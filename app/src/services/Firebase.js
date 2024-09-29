@@ -3,6 +3,7 @@ import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, 
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { v4 as uuidv4 } from 'uuid';
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -157,21 +158,60 @@ export const api = {
   writeImageSet: async (images, associatedText) => {
     try {
       if (!currentUser) throw new Error("User not authenticated");
-      console.log("Writing image set to Firestore");
-      console.log("Images URLs:", images);
+      console.log("Writing image set to Firebase Storage and Firestore");
       const timestamp = new Date().getTime();
-      const setId = crypto.randomUUID();
+      const setId = uuidv4();
+      const imageUrls = [];
+      console.log("Images:", images);
+      // Download and upload each image to Firebase Storage
+      for (let i = 0; i < images.length; i++) {
+        // Check if the image URL is a valid URL
+        if (!images[i].startsWith('http')) {
+          console.log("Invalid image URL:", images[i]);
+          console.error(`Invalid image URL: ${images[i]}`);
+          continue;
+        }
+
+        try {
+          const proxyUrl = `http://127.0.0.1:5001/herald-9c3c1/us-central1/proxy_fetch?url=${encodeURIComponent(images[i])}`;
+          console.log("Fetching image from proxy URL");
+          console.log("Proxy URL:", proxyUrl);
+          const response = await fetch(proxyUrl);
+          if (!response.ok) {
+            console.log("Response:", response);
+            console.log("Response URL:", response.url);
+            // console.log("Response error:", response.error());
+            console.log("Response status:", response.status);
+            console.log("Response status text:", response.statusText);
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          const blob = await response.blob();
+        } catch (error) {
+          console.error(`Error fetching image: ${error.message}`);
+          continue;
+        }
+        const imagePath = `imageSets/${setId}/${i}.jpg`;
+        console.log("Uploading image to Firebase Storage");
+        console.log("Image URL:", imagePath);
+        const imageRef = ref(storage, imagePath);
+        await uploadBytes(imageRef, blob);
+        const downloadUrl = await getDownloadURL(imageRef);
+        imageUrls.push(downloadUrl);
+      }
+
+      console.log("Images uploaded to Firebase Storage");
+      console.log("Image URLs:", imageUrls);
 
       // Create a document in Firestore to store the image set information
       const docRef = await addDoc(collection(db, 'imageSets'), {
         userId: currentUser.uid,
         timestamp: new Date(),
-        imageUrls: images,
+        imageUrls: imageUrls,
         associatedText: associatedText,
         setId: setId
       });
       
-      console.log("Image set uploaded to Firestore");
+      console.log("Image set information uploaded to Firestore");
       logAnalyticsEvent('write_image_set', { set_id: docRef.id });
       
       return docRef.id;

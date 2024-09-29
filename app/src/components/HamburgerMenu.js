@@ -54,6 +54,19 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
           transition: 'all 0.3s ease-in-out'
         }}
       />
+      <MenuButton
+        label={<strong><b>Chatbot</b></strong>}
+        onClick={() => setActiveSection('chatbot')}
+        retro90sStyle={{
+          ...retro90sStyle,
+          backgroundColor: '#FF69B4', // Hot pink background
+          color: '#000000', // Black text
+          border: '3px solid #FF1493', // Deep pink border
+          boxShadow: '0 0 10px #FF69B4, 0 0 20px #FF1493', // Pink glow
+          transform: 'scale(1.05)',
+          transition: 'all 0.3s ease-in-out'
+        }}
+      />
       <a href="https://forms.gle/kDMh3s8N7Q9fXhJj6" target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none' }}>
         <MenuButton
           label={<strong>Feedback</strong>}
