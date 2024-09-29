@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, query, orderBy, getDoc } from 'firebase/firestore';
+import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, arrayUnion, query, orderBy, getDoc, limit } from 'firebase/firestore';
 import { getAnalytics, logEvent } from "firebase/analytics";
 import { getAuth, signInAnonymously, onAuthStateChanged } from "firebase/auth";
-// import globalChatbot from '../App
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
 // Import the functions you need from the SDKs you need
 // TODO: Add SDKs for Firebase products that you want to use
@@ -25,6 +25,7 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const analytics = getAnalytics(app);
 const auth = getAuth(app);
+const storage = getStorage(app);
 
 let currentUser = null;
 
@@ -150,6 +151,83 @@ export const api = {
       allData[section] = data;
     }
     return allData;
+  },
+
+  // New function to write sets of images and associated text to Firebase Storage
+  writeImageSet: async (images, associatedText) => {
+    try {
+      if (!currentUser) throw new Error("User not authenticated");
+      console.log("Writing image set to Firestore");
+      console.log("Images URLs:", images);
+      const timestamp = new Date().getTime();
+      const setId = crypto.randomUUID();
+
+      // Create a document in Firestore to store the image set information
+      const docRef = await addDoc(collection(db, 'imageSets'), {
+        userId: currentUser.uid,
+        timestamp: new Date(),
+        imageUrls: images,
+        associatedText: associatedText,
+        setId: setId
+      });
+      
+      console.log("Image set uploaded to Firestore");
+      logAnalyticsEvent('write_image_set', { set_id: docRef.id });
+      
+      return docRef.id;
+    } catch (error) {
+      console.error("Error writing image set: ", error);
+      logAnalyticsEvent('error', { action: 'write_image_set', error: error.message });
+      throw error;
+    }
+  },
+
+  // Function to get a random image set from Firebase
+  getImageSet: async () => {
+    try {
+      const imageSetsRef = collection(db, 'imageSets');
+      const q = query(imageSetsRef, orderBy('timestamp', 'desc'), limit(1));
+      const querySnapshot = await getDocs(q);
+
+      if (querySnapshot.empty) {
+        console.log('No image sets found');
+        return null;
+      }
+
+      const randomIndex = Math.floor(Math.random() * querySnapshot.size);
+      const randomDoc = querySnapshot.docs[randomIndex];
+      const imageSet = { id: randomDoc.id, ...randomDoc.data() };
+
+      logAnalyticsEvent('get_random_image_set', { set_id: imageSet.id });
+      console.log("Random image set:", imageSet);
+      return imageSet;
+    } catch (error) {
+      console.error("Error getting random image set: ", error);
+      logAnalyticsEvent('error', { action: 'get_random_image_set', error: error.message });
+      throw error;
+    }
+  },
+
+  // Function to get a specific image set from Firebase based on ID
+  getImageSetById: async (imageSetId) => {
+    try {
+      const imageSetRef = doc(db, 'imageSets', imageSetId);
+      const imageSetDoc = await getDoc(imageSetRef);
+
+      if (!imageSetDoc.exists()) {
+        console.log('No image set found with the given ID');
+        return null;
+      }
+
+      const imageSet = { id: imageSetDoc.id, ...imageSetDoc.data() };
+
+      logAnalyticsEvent('get_image_set_by_id', { set_id: imageSet.id });
+      return imageSet;
+    } catch (error) {
+      console.error("Error getting image set by ID: ", error);
+      logAnalyticsEvent('error', { action: 'get_image_set_by_id', error: error.message });
+      throw error;
+    }
   }
 }
 

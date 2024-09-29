@@ -53,9 +53,9 @@ function App() {
         {activeSection === 'graffiti' && <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} />}
         {activeSection === 'ai-safety' && <AISafetyPage />}
       </div>
-      <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
+      {/* <div style={{ position: 'fixed', bottom: '20px', right: '20px', zIndex: 1000 }}>
         <ChatbotPanel aiInterface={aiInterface} retro90sStyle={retro90sStyle} />
-      </div>
+      </div> */}
     </div>
   );
 }
