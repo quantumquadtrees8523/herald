@@ -1,0 +1,7 @@
+// .eslintrc.js or .eslintrc.json
+{
+    "rules": {
+      "no-unused-vars": "off"  // Disable the no-unused-vars rule
+    }
+  }
+  

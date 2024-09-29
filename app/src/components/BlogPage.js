@@ -13,7 +13,7 @@ function BlogPage({
   const [sectionName] = useState(initialSectionName);
   const [isLocalhost, setIsLocalhost] = useState(true);
   const [previewMarkdown, setPreviewMarkdown] = useState('');
-  const [chatbot, setChatbot] = useState(globalChatbot);
+  const [chatbot /*,setChatbot*/] = useState(globalChatbot);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -24,10 +24,10 @@ function BlogPage({
     loadPage();
   }, [sectionName, isLocalhost]);
 
-  const getPosts = async () => {
-    const posts_list = await api.getPosts(sectionName);
-    return posts_list;
-  };
+  // const getPosts = async () => {
+  //   const posts_list = await api.getPosts(sectionName);
+  //   return posts_list;
+  // };
 
   const createPost = async (content) => {
     const newPostId = await api.createPost(content, sectionName);

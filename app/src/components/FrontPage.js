@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import ReactMarkdown from 'react-markdown';
 import api from '../services/Firebase';
 import { COMIC_PROMPT } from '../prompts';
@@ -12,6 +12,57 @@ const FrontPage = ({ retro90sStyle, aiInterface }) => {
     const [error, setError] = useState(null);
     const [isCreatingComic, setIsCreatingComic] = useState(false);
     const [comicTheme, setComicTheme] = useState('');
+
+    const fetchTodoNycSummary = useCallback(async () => {
+        try {
+            const todoNyc = await aiInterface.getTodoNycSummary();
+            setTodoNycSummary(todoNyc);
+            return todoNyc;
+        } catch (err) {
+            console.error('Error fetching Todo NYC summary:', err);
+            return null;
+        }
+    }, [aiInterface]);
+
+    const fetchBlogSummary = useCallback(async () => {
+        try {
+            const blog = await aiInterface.getBlogSummary();
+            setBlogSummary(blog);
+            return blog;
+        } catch (err) {
+            console.error('Error fetching Blog summary:', err);
+            return null;
+        }
+    }, [aiInterface]);
+
+    const fetchGraffitiSummary = useCallback(async () => {
+        try {
+            const graffiti = await aiInterface.getGraffitiSummary();
+            setGraffitiSummary(graffiti);
+            return graffiti;
+        } catch (err) {
+            console.error('Error fetching Graffiti summary:', err);
+            return null;
+        }
+    }, [aiInterface]);
+
+    const fetchAllSummaries = useCallback(async () => {
+        setIsLoading(true);
+        setError(null);
+        try {
+            const todoNyc = await fetchTodoNycSummary();
+            const blog = await fetchBlogSummary();
+            const graffiti = await fetchGraffitiSummary();
+            
+            localStorage.setItem('summaries', JSON.stringify({ todoNyc, blog, graffiti }));
+            localStorage.setItem('summariesTimestamp', new Date().getTime().toString());
+        } catch (err) {
+            setError('Failed to fetch summaries. Please try again.');
+            console.error('Error fetching summaries:', err);
+        } finally {
+            setIsLoading(false);
+        }
+    }, [fetchTodoNycSummary, fetchBlogSummary, fetchGraffitiSummary]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -50,40 +101,7 @@ const FrontPage = ({ retro90sStyle, aiInterface }) => {
         const intervalId = setInterval(fetchAllSummaries, 20 * 60 * 1000);
 
         return () => clearInterval(intervalId);
-    }, []);
-
-    const fetchTodoNycSummary = async () => {
-        try {
-            const todoNyc = await aiInterface.getTodoNycSummary();
-            setTodoNycSummary(todoNyc);
-            return todoNyc;
-        } catch (err) {
-            console.error('Error fetching Todo NYC summary:', err);
-            return null;
-        }
-    };
-
-    const fetchBlogSummary = async () => {
-        try {
-            const blog = await aiInterface.getBlogSummary();
-            setBlogSummary(blog);
-            return blog;
-        } catch (err) {
-            console.error('Error fetching Blog summary:', err);
-            return null;
-        }
-    };
-
-    const fetchGraffitiSummary = async () => {
-        try {
-            const graffiti = await aiInterface.getGraffitiSummary();
-            setGraffitiSummary(graffiti);
-            return graffiti;
-        } catch (err) {
-            console.error('Error fetching Graffiti summary:', err);
-            return null;
-        }
-    };
+    }, [fetchAllSummaries, fetchBlogSummary, fetchGraffitiSummary, fetchTodoNycSummary]);
 
     const fetchComic = async () => {
         try {
@@ -113,25 +131,6 @@ const FrontPage = ({ retro90sStyle, aiInterface }) => {
         }
     };
 
-    const fetchAllSummaries = async () => {
-        setIsLoading(true);
-        setError(null);
-        try {
-            const todoNyc = await fetchTodoNycSummary();
-            const blog = await fetchBlogSummary();
-            const graffiti = await fetchGraffitiSummary();
-            
-            localStorage.setItem('summaries', JSON.stringify({ todoNyc, blog, graffiti }));
-            localStorage.setItem('summariesTimestamp', new Date().getTime().toString());
-        } catch (err) {
-            setError('Failed to fetch summaries. Please try again.');
-            console.error('Error fetching summaries:', err);
-        } finally {
-            setIsLoading(false);
-        }
-    };
-
-    const strongBlackBorder = '3px solid #000000';
     const mediumBlackBorder = '2px solid #000000';
   
     const pageStyle = {

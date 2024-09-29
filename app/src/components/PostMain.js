@@ -7,7 +7,7 @@ const Post = ({ post, sectionName, globalChatbot }) => {
   const [localComments, setLocalComments] = useState([]);
   const [localCommentInput, setLocalCommentInput] = useState('');
   const [showComments, setShowComments] = useState(false);
-  const [chatbot, setChatbot] = useState(globalChatbot);
+  // const [chatbot, setChatbot] = useState(globalChatbot);
 
   useEffect(() => {
     const fetchComments = async () => {
@@ -26,7 +26,7 @@ const Post = ({ post, sectionName, globalChatbot }) => {
     setShowComments(!showComments);
   };
 
-  const addComment = async (globalChatbot,postId, commentContent) => {
+  const addComment = async (postId, commentContent) => {
     await api.addComment(sectionName, postId, commentContent);
     await globalChatbot.chat(`New comment added to post ${postId} in section ${sectionName}: ${commentContent}`);
   };
@@ -34,8 +34,7 @@ const Post = ({ post, sectionName, globalChatbot }) => {
   const handleAddComment = async () => {
     if (localCommentInput.trim()) {
       try {
-        await api.addComment(sectionName, post.id, localCommentInput);
-        await addComment(globalChatbot, post.id, localCommentInput);
+        await addComment(post.id, localCommentInput);
         const newComment = {
           content: localCommentInput,
           timestamp: new Date(),
@@ -43,6 +42,7 @@ const Post = ({ post, sectionName, globalChatbot }) => {
         };
         
         setLocalComments([...localComments, newComment]);
+        setLocalCommentInput('');
       } catch (error) {
         console.error("Error adding comment: ", error);
         setLocalCommentInput('');
