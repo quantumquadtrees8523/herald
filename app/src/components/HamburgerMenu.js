@@ -44,7 +44,7 @@ const NavigationButtons = ({ setActiveSection, retro90sStyle }) => {
         retro90sStyle={retro90sStyle}
       />
       <MenuButton
-        label={<strong>how ai is used on this site</strong>}
+        label={<strong>How this website works</strong>}
         onClick={() => setActiveSection('ai-safety')}
         retro90sStyle={{
           ...retro90sStyle,

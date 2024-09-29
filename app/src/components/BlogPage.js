@@ -6,14 +6,13 @@ import {api} from '../services/Firebase';
 function BlogPage({ 
   sectionName: initialSectionName, 
   retro90sStyle,
-  globalChatbot
+  aiInterface
 }) {
   const [input, setInput] = useState('');
   const [posts, setPosts] = useState([]);
   const [sectionName] = useState(initialSectionName);
   const [isLocalhost, setIsLocalhost] = useState(true);
   const [previewMarkdown, setPreviewMarkdown] = useState('');
-  const [chatbot /*,setChatbot*/] = useState(globalChatbot);
 
   useEffect(() => {
     const loadPage = async () => {
@@ -24,11 +23,6 @@ function BlogPage({
     loadPage();
   }, [sectionName, isLocalhost]);
 
-  // const getPosts = async () => {
-  //   const posts_list = await api.getPosts(sectionName);
-  //   return posts_list;
-  // };
-
   const createPost = async (content) => {
     const newPostId = await api.createPost(content, sectionName);
     const newPost = {
@@ -37,7 +31,7 @@ function BlogPage({
       timestamp: new Date(),
       comments: []
     };
-    await chatbot.chat(`New post created in section ${sectionName}: ${content}`);
+    await aiInterface.chat(`New post created in section ${sectionName}: ${content}`);
     return newPost;
   };
 
@@ -86,7 +80,7 @@ function BlogPage({
             post={post}
             sectionName={sectionName}
             retro90sStyle={retro90sStyle}
-            globalChatbot={globalChatbot}
+            aiInterface={aiInterface}
           />
         ))}
       </div>

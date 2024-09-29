@@ -12,6 +12,11 @@ const FrontPage = ({ retro90sStyle, aiInterface }) => {
     const [error, setError] = useState(null);
     const [isCreatingComic, setIsCreatingComic] = useState(false);
     const [comicTheme, setComicTheme] = useState('');
+    const [isLocalhost, setIsLocalhost] = useState(false);
+
+    useEffect(() => {
+        setIsLocalhost(window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+    }, []);
 
     const fetchTodoNycSummary = useCallback(async () => {
         try {
@@ -222,18 +227,20 @@ const FrontPage = ({ retro90sStyle, aiInterface }) => {
                     >
                         {isLoading ? 'Loading...' : 'Refresh Summaries'}
                     </button>
-                    <button 
-                        onClick={createComic} 
-                        style={{
-                            ...buttonStyle, 
-                            backgroundColor: '#4169E1',
-                            color: 'white', 
-                            fontWeight: 'bold'
-                        }}
-                        disabled={isCreatingComic}
-                    >
-                        {isCreatingComic ? 'Creating Comic...' : 'Create Comic'}
-                    </button>
+                    {isLocalhost && (
+                        <button 
+                            onClick={createComic} 
+                            style={{
+                                ...buttonStyle, 
+                                backgroundColor: '#4169E1',
+                                color: 'white', 
+                                fontWeight: 'bold'
+                            }}
+                            disabled={isCreatingComic}
+                        >
+                            {isCreatingComic ? 'Creating Comic...' : 'Create Comic'}
+                        </button>
+                    )}
                 </div>
             </div>
             <div className="summaries-container" style={summariesContainerStyle}>

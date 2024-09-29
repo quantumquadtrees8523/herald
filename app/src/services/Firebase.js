@@ -163,6 +163,7 @@ export const api = {
       const setId = uuidv4();
       const imageUrls = [];
       console.log("Images:", images);
+      let blob = null;
       // Download and upload each image to Firebase Storage
       for (let i = 0; i < images.length; i++) {
         // Check if the image URL is a valid URL
@@ -173,19 +174,23 @@ export const api = {
         }
 
         try {
-          const proxyUrl = `http://127.0.0.1:5001/herald-9c3c1/us-central1/proxy_fetch?url=${encodeURIComponent(images[i])}`;
+          const prodProxyUrl = `https://proxy-fetch-m5p3u62jta-uc.a.run.app?url=${encodeURIComponent(images[i])}`;
+          const localProxyUrl = `http://127.0.0.1:5001/herald-9c3c1/us-central1/proxy_fetch?url=${encodeURIComponent(images[i])}`;
+          const proxyUrl = localProxyUrl;
           console.log("Fetching image from proxy URL");
           console.log("Proxy URL:", proxyUrl);
+          console.log("Auth token:", auth.currentUser.getIdToken());
           const response = await fetch(proxyUrl);
           if (!response.ok) {
             console.log("Response:", response);
             console.log("Response URL:", response.url);
-            // console.log("Response error:", response.error());
             console.log("Response status:", response.status);
             console.log("Response status text:", response.statusText);
             throw new Error(`HTTP error! status: ${response.status}`);
           }
-          const blob = await response.blob();
+          console.log("response: " , response);
+          // console.log("response.blob(): ", await response.blob());
+          blob = await response.blob();
         } catch (error) {
           console.error(`Error fetching image: ${error.message}`);
           continue;

@@ -3,23 +3,20 @@ import ReactMarkdown from 'react-markdown';
 
 const AISafetyPage = () => {
   const markdownContent = `
-# AI Safety
+# How This Works
+
+## High Level
+**All text on the site is indexed by AI**, allowing you to easily query and search through all available content.
 
 ## Introduction
-Artificial Intelligence (AI) safety is a critical concern as we develop more advanced AI systems.
+**Artificial Intelligence (AI) safety** is a critical concern as we continue to develop more advanced systems. It's essential to ensure that these technologies are developed responsibly.
 
 ## Key Points
-1. Alignment: Ensuring AI systems behave in ways aligned with human values.
-2. Robustness: Developing AI that performs reliably in various environments.
-3. Transparency: Creating AI systems that are interpretable and explainable.
+- Summaries are **automatically generated** for the entire website.
+- You can engage with the **chatbot** and ask questions about any part of the website, excluding images.
 
-## Challenges
-- Unpredictable emergent behaviors
-- Potential misuse of AI technologies
-- Long-term implications of superintelligent AI
-
-## Conclusion
-Addressing AI safety is crucial for the responsible development of AI technologies.
+## Timestamp
+*Last updated on September 29, 2024, at 5:28:30 PM (UTC-4)*
   `;
 
   return (

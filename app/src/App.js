@@ -93,9 +93,9 @@ function App() {
       )}
       <div style={{ flex: 1, overflow: 'auto', padding: isMobile ? '10px' : '20px' }}>
         {activeSection === 'front_page' && <FrontPage aiInterface={aiInterface} retro90sStyle={retro90sStyle} isMobile={isMobile} />}
-        {activeSection === 'blog' && <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} isMobile={isMobile} />}
-        {activeSection === 'todo-nyc' && <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} isMobile={isMobile} />}
-        {activeSection === 'graffiti' && <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} isMobile={isMobile} />}
+        {activeSection === 'blog' && <BlogPage sectionName="blog" retro90sStyle={retro90sStyle} isMobile={isMobile} aiInterface={aiInterface} />}
+        {activeSection === 'todo-nyc' && <BlogPage sectionName="todo nyc" retro90sStyle={retro90sStyle} isMobile={isMobile} aiInterface={aiInterface} />}
+        {activeSection === 'graffiti' && <BlogPage sectionName="graffiti" retro90sStyle={retro90sStyle} isMobile={isMobile} aiInterface={aiInterface} />}
         {activeSection === 'ai-safety' && <AISafetyPage isMobile={isMobile} />}
         {activeSection === 'chatbot' && <ChatbotPanel aiInterface={aiInterface} retro90sStyle={retro90sStyle} isMobile={isMobile} />}
       </div>
