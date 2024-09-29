@@ -11,6 +11,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      # Navigate to the 'app/' directory
+      - name: Navigate to app directory
+        working-directory: ./app
+      - run: npm install --package-lock-only  # Generates the package-lock.json
       - run: npm ci && npm run build
       - uses: FirebaseExtended/action-hosting-deploy@v0
         with:
