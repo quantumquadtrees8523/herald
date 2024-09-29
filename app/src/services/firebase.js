@@ -186,17 +186,16 @@ export const api = {
   getImageSet: async () => {
     try {
       const imageSetsRef = collection(db, 'imageSets');
-      const q = query(imageSetsRef, orderBy('timestamp', 'desc'), limit(1));
-      const querySnapshot = await getDocs(q);
+      const querySnapshot = await getDocs(imageSetsRef);
 
       if (querySnapshot.empty) {
         console.log('No image sets found');
         return null;
       }
 
-      const randomIndex = Math.floor(Math.random() * querySnapshot.size);
-      const randomDoc = querySnapshot.docs[randomIndex];
-      const imageSet = { id: randomDoc.id, ...randomDoc.data() };
+      const imageSets = querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const randomIndex = Math.floor(Math.random() * imageSets.length);
+      const imageSet = imageSets[randomIndex];
 
       logAnalyticsEvent('get_random_image_set', { set_id: imageSet.id });
       console.log("Random image set:", imageSet);

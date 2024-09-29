@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
-import BlogPage from './components/blog_page';
-import HamburgerMenu from './components/hamburger-menu';
-import AISafetyPage from './components/ai-safety-page';
-import AiInterface from './services/ai_interface';
-import FrontPage from './components/front-page';
-import ChatbotPanel from './components/chatbot-panel';
+import BlogPage from './components/BlogPage';
+import HamburgerMenu from './components/HamburgerMenu';
+import AISafetyPage from './components/AiSafetyPage';
+import AiInterface from './services/AiInterface';
+import FrontPage from './components/FrontPage';
+import ChatbotPanel from './components/ChatbotPanel';
 
 function App() {
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
-  const [activeSection, setActiveSection] = useState('front_page');
+  const [activeSection, setActiveSection] = useState('blog');
   const [aiInterface, setAiInterface] = useState(null);
 
   useEffect(() => {

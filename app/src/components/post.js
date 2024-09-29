@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import ReactMarkdown from 'react-markdown';
-import Comment from './comment';
-import { api } from '../services/firebase';
+import Comment from './Comment';
+import { api } from '../services/Firebase';
 
 const Post = ({ post, sectionName, globalChatbot }) => {
   const [localComments, setLocalComments] = useState([]);
